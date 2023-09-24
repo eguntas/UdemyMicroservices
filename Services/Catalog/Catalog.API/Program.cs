@@ -1,5 +1,7 @@
 using Catalog.API.Services;
 using Catalog.API.Setting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Options;
 using System.Configuration;
 
@@ -13,12 +15,23 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddControllers();
+builder.Services.AddControllers(opt =>
+{
+    opt.Filters.Add(new AuthorizeFilter());
+});
+
 
 builder.Services.Configure<DatabaseSetting>(builder.Configuration.GetSection("DatabaseSetting"));
 builder.Services.AddSingleton<IDatabaseSetting>(sp =>
 {
     return sp.GetRequiredService<IOptions<DatabaseSetting>>().Value;
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.Authority = builder.Configuration["IdentityServerURL"];
+    options.Audience = "resource_catalog";
+    options.RequireHttpsMetadata = false;    
 });
 var app = builder.Build();
 

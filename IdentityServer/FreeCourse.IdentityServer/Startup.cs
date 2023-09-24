@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using FreeCourse.IdentityServer.Services;
 
 namespace FreeCourse.IdentityServer
 {
@@ -28,6 +29,7 @@ namespace FreeCourse.IdentityServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLocalApiAuthentication();
             services.AddControllersWithViews();
 
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -48,6 +50,7 @@ namespace FreeCourse.IdentityServer
                 options.EmitStaticAudienceClaim = true;
             })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
+                .AddInMemoryApiResources(Config.ApiResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients)
                 .AddAspNetIdentity<ApplicationUser>();
@@ -66,6 +69,8 @@ namespace FreeCourse.IdentityServer
                     options.ClientId = "copy client ID from Google here";
                     options.ClientSecret = "copy client secret from Google here";
                 });
+
+            builder.AddResourceOwnerValidator<IdentityResourceOwnerPasswordvalidator>();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -81,6 +86,7 @@ namespace FreeCourse.IdentityServer
             app.UseRouting();
             app.UseIdentityServer();
             app.UseAuthorization();
+            app.UseAuthentication();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();

@@ -1,13 +1,21 @@
 ﻿using FreeCourse.IdentityServer.Dtos;
 using FreeCourse.IdentityServer.Models;
+using FreeCourse.Shared.Dtos;
+using IdentityServer4.Hosting.LocalApiAuthentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System.Linq;
 using System.Threading.Tasks;
+using static IdentityServer4.IdentityServerConstants;
 
 namespace FreeCourse.IdentityServer.Controllers
 {
-    [Route("api/[controller]")]
+
+    [Authorize(LocalApi.PolicyName)]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -18,18 +26,31 @@ namespace FreeCourse.IdentityServer.Controllers
             _userManager = userManager;
         }
         //Shared projesini 3.1 olarak oluştur o yüzden hata alınıyor
-        //[HttpPost]
-        //public async Task<IActionResult> SignUp(SignupDto dto)
-        //{
-        //    var user = new ApplicationUser
-        //    {
-        //        UserName = dto.UserName,
-        //        Email = dto.Email
+        [HttpPost]
+        public async Task<IActionResult> SignUp(SignupDto dto)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = dto.UserName,
+                Email = dto.Email
+            };
+            var result =await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                return BadRequest(Shared.Dtos.Response<NoContent>.Fail(result.Errors.Select(x=>x.Description).ToList(), 400));
+            }
+            return NoContent();
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUser()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(x=>x.Type == JwtRegisteredClaimNames.Sub);
+            if (userIdClaim == null) return BadRequest();
 
-        //    };
-        //    var result = _userManager.CreateAsync(user, dto.Password);
+            var user = await _userManager.FindByIdAsync(userIdClaim.Value);
+            if (user == null) return BadRequest();
 
-
-        //}
+            return Ok(new { Id=user.Id , UserName = user.UserName , Email = user.Email });
+        }
     }
 }
