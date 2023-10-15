@@ -2,3 +2,4 @@
 -photostockAPI -> 5012
 -identityserver -> 5001
 -Basket -> 5013
+-Discount -> 5014

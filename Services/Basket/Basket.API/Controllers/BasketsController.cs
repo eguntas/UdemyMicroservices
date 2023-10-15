@@ -30,6 +30,7 @@ namespace Basket.API.Controllers
             var response = await _basketService.SaveOrUpdate(basketDto);
             return CreateActionResultInstance(response);
         }
+        [HttpDelete]
         public async Task<IActionResult> Delete()
         {
             return CreateActionResultInstance(await _basketService.Delete(_sharedIdentityService.GetUserId));

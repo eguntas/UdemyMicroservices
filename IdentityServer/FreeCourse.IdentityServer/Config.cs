@@ -17,6 +17,7 @@ namespace FreeCourse.IdentityServer
             new ApiResource("resource_catalog"){Scopes =  {"catalog_fullpermission"}},
             new ApiResource("resource_photo_stock"){Scopes =  {"photo_stock_fullpermission"}},
             new ApiResource("resource_basket"){Scopes =  {"basket_fullpermission"}},
+            new ApiResource("resource_discount"){Scopes =  {"discount_fullpermission"}},
             new ApiResource(IdentityServerConstants.LocalApi.ScopeName)
 
         };
@@ -27,7 +28,11 @@ namespace FreeCourse.IdentityServer
                         new IdentityResources.Email(),
                         new IdentityResources.OpenId(),
                         new IdentityResources.Profile(),
-                        new IdentityResource(){Name="roles" , DisplayName="Roles",Description = "Kullanıcı rolleri",UserClaims=new[]{"role"}}
+                        new IdentityResource(){
+                            Name="roles" , 
+                            DisplayName="Roles",
+                            Description = "Kullanıcı rolleri",
+                            UserClaims=new[]{"role"}}
 
                    };
 
@@ -37,6 +42,7 @@ namespace FreeCourse.IdentityServer
                 new ApiScope("catalog_fullpermission","CatalogAPI full permission"),
                 new ApiScope("photo_stock_fullpermission", "PhotoAPI full permission"),
                 new ApiScope("basket_fullpermission", "BasketAPI full permission"),
+                new ApiScope("discount_fullpermission", "DiscountAPI full permission"),
                 new ApiScope(IdentityServerConstants.LocalApi.ScopeName)
             };
 
@@ -45,11 +51,14 @@ namespace FreeCourse.IdentityServer
             {
                 new Client
                 {
-                   ClientName="Asp.Net Core Mvc",
+                    ClientName="Asp.Net Core Mvc",
                     ClientId = "WebMvcClient",
                     ClientSecrets = {new Secret("secret".Sha256())},
                     AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    AllowedScopes = { "catalog_fullpermission", "photo_stock_fullpermission" , IdentityServerConstants.LocalApi.ScopeName }
+                    AllowedScopes = 
+                    { "catalog_fullpermission", "photo_stock_fullpermission" , 
+                        IdentityServerConstants.LocalApi.ScopeName 
+                    }
 
                 },
                 new Client
@@ -59,13 +68,19 @@ namespace FreeCourse.IdentityServer
                     AllowOfflineAccess = true,
                     ClientSecrets = {new Secret("secret".Sha256())},
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-                    AllowedScopes = {"basket_fullpermission", IdentityServerConstants.StandardScopes.Email , IdentityServerConstants.StandardScopes.OpenId, 
-                    IdentityServerConstants.StandardScopes.Profile , IdentityServerConstants.StandardScopes.OfflineAccess,
-                    IdentityServerConstants.LocalApi.ScopeName,"roles"},
-                    AccessTokenLifetime=1*60*60,RefreshTokenExpiration=TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime =(int)(DateTime.Now.AddDays(60)-DateTime.Now).TotalSeconds,
-                    RefreshTokenUsage = TokenUsage.ReUse
-                }
+                    AllowedScopes = 
+                    {
+                        "basket_fullpermission",
+                        "discount_fullpermission",
+                        IdentityServerConstants.StandardScopes.Email , 
+                        IdentityServerConstants.StandardScopes.OpenId, 
+                        IdentityServerConstants.StandardScopes.Profile ,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.LocalApi.ScopeName,"roles"},
+                        AccessTokenLifetime=1*60*60,RefreshTokenExpiration=TokenExpiration.Absolute,
+                        AbsoluteRefreshTokenLifetime =(int)(DateTime.Now.AddDays(60)-DateTime.Now).TotalSeconds,
+                        RefreshTokenUsage = TokenUsage.ReUse
+                    }
             };
     }
 }
